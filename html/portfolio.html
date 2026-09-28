@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polygon with Rotating Squares</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body {
+      background-color: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .screen-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .screen-overlay img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .screen-overlay #scan {
+      opacity: 0.6;
+    }
+
+    .square {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background-color: black;
+      border: 5px solid green;
+      border-radius: 10%;
+      cursor: pointer;
+      transform-origin: 50px 50px;
+    }
+
+    .square:hover {
+      background-color: lime;
+      animation: colfade;
+      animation-delay: 0s;
+      animation-duration: 0.5s;
+      animation-fill-mode: forwards;
+    }
+
+    .overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: lime;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.square:hover .overlay {
+    opacity: 0.5;
+}
+
+
+    #polygon {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      transform-origin: center;
+      visibility: hidden;
+    }
+
+    .title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max-content;
+    max-width: calc(100% - 12px);
+    box-sizing: border-box;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.9);
+    font-size: 14px;
+    text-align: center;
+    color: green;
+    text-shadow: 0 0 6px green, 0 0 0px green;
+    overflow-wrap: anywhere;
+    z-index: 1;
+    transform: translate(-50%, -50%);
+}
+
+/* .go-back {
+    position: absolute;
+    color: green;
+    font-size: 20px;
+    cursor: pointer;
+    top: 90%;
+    left: 50%;
+} */
+
+.go-back {
+    position: absolute;
+    color: green;
+    font-size: 20px;
+    cursor: pointer;
+    text-shadow: 0 0 6px green, 0 0 0px green;
+    top: calc(50% + 270px);
+    left: 50%;
+    transform: translate(-50%, 0);
+  }
+
+    .info-box {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: black;
+  border: 5px solid green;
+  border-radius: 10%;
+  width: 300px;
+  height: 200px;
+  display: none;
+  color: green;
+  text-shadow: 0 0 6px green, 0 0 0px green;
+  text-align: center;
+  padding: 20px;
+  font-size: 24px;
+}
+  </style>
+</head>
+
+<body>
+  <div class="screen-overlay" aria-hidden="true">
+    <img src="../img/bezel.png" alt="">
+    <img src="../img/scanlines.png" id="scan" alt="">
+  </div>
+  <script>
+//Global vars
+	let rotation = 0;
+	let rotationSpeed = 5;
+	let spinning = false;
+
+  $(document).ready(function() {
+
+    function init() {
+      const polygon = $('#polygon');
+      const windowHeight = $(window).height();
+      const polygonHeight = polygon.outerHeight();
+      const initialTop = -polygonHeight;
+      const finalTop = (windowHeight - polygonHeight) / 2;
+
+      polygon.css({
+        'position': 'fixed',
+        'top': `${initialTop}px`,
+        'visibility': 'visible',
+      });
+
+      const fallDuration = 1500;
+      const fallDistance = finalTop - initialTop;
+      const initialSpeed = (2 * fallDistance) / fallDuration;
+      const acceleration = -(initialSpeed * initialSpeed) / (2 * fallDistance);
+
+      let currentTime = 0;
+      let startTime;
+
+      //let rotation = 0;
+      //let rotationSpeed = 5; // Set an initial rotation speed
+      let deceleration = -0.015;
+
+      function fall(timestamp) {
+        if (!startTime) {
+          startTime = timestamp;
+        }
+
+        const elapsed = timestamp - startTime;
+        currentTime = Math.min(elapsed, fallDuration);
+        let speed = initialSpeed + acceleration * currentTime;
+        let distance = initialTop + initialSpeed * currentTime + 0.5 * acceleration * currentTime * currentTime;
+        polygon.css('top', `${distance}px`);
+
+        if (currentTime < fallDuration) {
+          if (rotationSpeed > 0.02) {
+            rotationSpeed += deceleration;
+            rotation += rotationSpeed;
+            $('#polygon').css({
+              'transform': `rotate(${rotation}deg)`
+            });
+            $('.square').css({
+              'transform': `rotate(${-rotation}deg)`
+            });
+          }
+          requestAnimationFrame(fall);
+        } else {
+          function decelerate() {
+            if (rotationSpeed > 0.02) {
+              rotationSpeed += deceleration;
+              rotation += rotationSpeed;
+              $('#polygon').css({
+                'transform': `rotate(${rotation}deg)`
+              });
+              $('.square').css({
+                'transform': `rotate(${-rotation}deg)`
+              });
+              requestAnimationFrame(decelerate);
+            }
+          }
+          decelerate();
+        }
+      }
+
+
+      requestAnimationFrame(fall);
+    }
+
+
+    function centerPolygonOnResize() {
+      const polygon = $('#polygon');
+      const windowHeight = $(window).height();
+      const polygonHeight = polygon.outerHeight();
+      const finalTop = (windowHeight - polygonHeight) / 2;
+
+      polygon.css('top', `${finalTop}px`);
+    }
+
+    init(); // Call the init function
+
+    $(window).on('resize', centerPolygonOnResize);
+  });
+
+
+
+
+
+
+  function showInfoBox(title) {
+  $('.info-box').remove(); // Remove any existing information boxes
+  const infoBox = $('<div>').addClass('info-box').text(title);
+  $('body').append(infoBox);
+  infoBox.delay(500).fadeIn(500);
+  popUp(infoBox);
+
+}
+
+function popUp(infobox) {
+  infobox.animate({
+    'width': '+=40',
+    'height': '+=40',
+    'fontSize': '+=4'
+  }, 300).animate({
+    'width': '-=40',
+    'height': '-=40',
+    'fontSize': '-=4'
+  }, 300);
+}
+
+
+    function createPolygon(sides, size, squareData) {
+      const polygon = $('<div>').attr('id', 'polygon');
+      const angle = 2 * Math.PI / sides;
+
+      for (let i = 0; i < sides; i++) {
+        const square = $('<div>').addClass('square');
+        const x = size * Math.cos(i * angle);
+        const y = size * Math.sin(i * angle);
+        square.css({
+          'top': `${size + y - 50}px`,
+          'left': `${size + x - 50}px`
+        });
+
+        // Add title and image
+        const title = $('<div>').addClass('title').text(squareData[i].title);
+        square.css({
+          'background-image': `url(${squareData[i].imgSrc})`,
+          'background-size': 'cover'
+        });
+        square.append(title);
+
+        const overlay = $('<div>').addClass('overlay');
+        square.append(overlay);
+
+        polygon.append(square);
+
+   const goBackText = $('<div>').addClass('go-back').text('Go back').hide();
+   $('body').append(goBackText);
+
+   // goBackText.on('click', function() {
+   //     goBackText.hide();
+   //     $('.square').fadeIn(1000);
+   // });
+
+   square.on('click', function() {
+  if (!spinning) {
+    showInfoBox(squareData[i].title);
+  }
+});
+
+      }
+
+      $('body').append(polygon);
+
+      //let rotation = 0;
+      //let spinning = false;
+      //let rotationSpeed = 0.5;
+      let acceleration = 0.1;
+
+      function spin() {
+        if (spinning) {
+          rotationSpeed += acceleration;
+          rotation += rotationSpeed;
+          $('#polygon').css({
+            'transform': `rotate(${rotation}deg)`
+          });
+          $('.square').css({
+            'transform': `rotate(${-rotation}deg)`
+          });
+          requestAnimationFrame(spin);
+        }
+      }
+
+      $('.square').on('click', function() {
+        if (!spinning) {
+          spinning = true;
+          spin();
+          goBackText.delay(0).fadeIn(400);
+          setTimeout(function() {
+            $('.square').fadeOut(900, function() {
+
+              spinning = false;
+              rotationSpeed = 0.5;
+            });
+          }, 0); // Set the duration (in milliseconds) before fading to black
+        }
+      });
+
+      const goBackText = $('<div>').addClass('go-back').text('Go back').hide();
+  $('body').append(goBackText);
+
+  goBackText.on('click', function() {
+goBackText.fadeOut(100);
+spinning = true;
+rotationSpeed = 5; // Set an initial rotation speed
+let deceleration = -0.02;
+function decelerate() {
+  if (rotationSpeed > 0.02) {
+      rotationSpeed += deceleration;
+      rotation += rotationSpeed;
+      $('#polygon').css({
+          'transform': `rotate(${rotation}deg)`
+      });
+      $('.square').css({
+          'transform': `rotate(${-rotation}deg)`
+      });
+      requestAnimationFrame(decelerate);
+  } else {
+      rotationSpeed = 0.5;
+      spinning = false;
+  }
+}
+decelerate();
+$('.square').fadeIn(1000);
+$('.info-box').each(function() {
+$(this).fadeOut(500, function() {
+  $(this).remove();
+});
+});
+});
+
+
+    }
+
+    createPolygon(6, 200, [{
+        title: 'Square 1',
+        imgSrc: '../img/Bonzi.jpg'
+      },
+      {
+        title: 'Square 2',
+        imgSrc: '../img/catapult.jpeg'
+      },
+      {
+        title: 'Square 3',
+        imgSrc: '../img/gmodGun.png'
+      },
+      {
+        title: 'Square 4',
+        imgSrc: '../img/haram.jpg'
+      },
+      {
+        title: 'Square 5',
+        imgSrc: '../img/The-North-Face-logo.png'
+      },
+      {
+        title: 'Square 6',
+        imgSrc: '../img/z_map_kino_der_untoten.jpg'
+      }
+      // {
+      //   title: 'Square 7',
+      //   imgSrc: 'img/z_map_kino_der_untoten.jpg'
+      // },
+      // {
+      //   title: 'Square 8',
+      //   imgSrc: 'img/z_map_kino_der_untoten.jpg'
+      // }
+    ]);
+
+    function fallDownAndFadeOut() {
+  $('html, body').css('overflow', 'hidden');
+  const fallDuration = 1500;
+  const windowHeight = $(window).height();
+  const polygonHeight = $('#polygon').outerHeight();
+  const initialTop = (windowHeight - polygonHeight) / 2;
+  const finalTop = windowHeight + polygonHeight;
+
+  const fallDistance = finalTop - initialTop;
+  const initialSpeed = (2 * fallDistance) / fallDuration;
+  const acceleration = -(initialSpeed * initialSpeed) / (2 * fallDistance);
+
+  let currentTime = 0;
+  let startTime;
+
+  function fall(timestamp) {
+    if (!startTime) {
+      startTime = timestamp;
+    }
+
+    const elapsed = timestamp - startTime;
+    currentTime = Math.min(elapsed, fallDuration);
+    let speed = initialSpeed + acceleration * currentTime;
+    let distance = initialTop + initialSpeed * currentTime + 0.5 * acceleration * currentTime * currentTime;
+    $('#polygon').css('top', `${distance}px`);
+
+    if (currentTime < fallDuration) {
+      requestAnimationFrame(fall);
+    } else {
+      $('#polygon').fadeOut(500, function () {
+	$('html, body').css('overflow', '');
+	});
+    }
+  }
+
+  requestAnimationFrame(fall);
+}
+
+window.addEventListener('popstate', fallDownAndFadeOut);
+
+  </script>
+</body>
+
+</html>

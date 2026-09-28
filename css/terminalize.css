@@ -1,0 +1,157 @@
+body {
+    background-color: black;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+    body.noScroll {
+        overflow: hidden;
+    }
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    pointer-events: none;
+}
+
+    .overlay img {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    #scan {
+        opacity: 0.4;
+    }
+
+#wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;    
+}
+
+canvas {
+    display: block;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+#wood {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100vh;
+    height: 100px;
+    transform: rotate(90deg) translateY(-100%);
+}
+
+
+
+#wood2 {
+    position: absolute;
+    right: 2vw;
+    width: 100vh;
+    height: 100px;
+    transform: rotate(90deg);
+}
+
+
+ul#mainMenu {
+    width: fit-content;
+    height: fit-content;
+    color: green;
+    list-style-type: none;
+    padding: 10px;
+    border: 2px solid green;
+    border-radius: 10px;
+    font: italic 1.2em/1.5em monospace, monospace;
+    text-shadow: 0 0 6px green, 0 0 0px green;
+    background-color: rgba(255, 255, 255, .05);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    position: relative;
+}
+
+.contactPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    border: 2px solid green;
+    border-radius: 10px;
+    color: green;
+    font: italic 1.2em/1.5em monospace, monospace;
+    text-shadow: 0 0 6px green, 0 0 0px green;
+    background-color: rgba(255, 255, 255, .05);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    position: relative;
+}
+
+
+li.mainMenu {
+    border: 2px solid green;
+    border-radius: 10px;
+    padding: 0;
+    margin-top: 5px;
+}
+
+    li.mainMenu a {
+        display: block;
+        padding: 5px;
+    }
+
+    li.mainMenu:hover {
+        cursor: pointer;
+        animation: colfade;
+        animation-delay: 0s;
+        animation-duration: 0.5s;
+        animation-fill-mode: forwards;
+    }
+
+a {
+    text-decoration: none;
+    color: green;
+}
+
+    a:visited {
+        text-decoration: none;
+    }
+
+h1 {
+    color: green
+}
+
+@keyframes colfade {
+    from {
+        background-color: #000000;
+    }
+
+    to {
+        background-color: #6BDE1F;
+    }
+}
+
+@font-face {
+    font-family: 'Terminal';
+    src: url('../fonts/terminal.ttf');
+}

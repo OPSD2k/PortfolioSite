@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Click to Spin Squares</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .square-parent {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 80vh;
+      perspective: 800px;
+    }
+
+    .square-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform-style: preserve-3d;
+      transition: transform 1s;
+    }
+
+    .square-parent.clicked .square-container {
+      transform: rotate3d(0, 0, 1, 120deg);
+    }
+
+    .square-parent.clicked .square-container:nth-of-type(2) {
+      transform: rotate3d(0, 0, 1, -120deg);
+    }
+
+    .square-parent.clicked .square-container:nth-of-type(3) {
+      transform: rotate3d(0, 0, 1, 0deg);
+    }
+
+    .square {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      background-color: #66CC66;
+      border-radius: 10px;
+      margin: 20px;
+      transition: transform 1s;
+      transform-style: preserve-3d;
+    }
+
+    .square:before {
+      content: attr(title);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      font-weight: bold;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="square-parent">
+    <div class="square-container">
+      <div class="square" title="Square 1"></div>
+      <div class="square" title="Square 2"></div>
+      <div class="square" title="Square 3"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Get the square parent container
+    const squareParent = document.querySelector('.square-parent');
+
+    // Set up click event listener for the parent container
+    squareParent.addEventListener('click', () => {
+      // Add 'clicked' class to the parent container
+      squareParent.classList.add('clicked');
+
+      // Remove 'clicked' class from the parent container after 3 seconds
+      setTimeout(() => {
+        squareParent.classList.remove('clicked');
+      }, 3000);
+    });
+  </script>
+</body>
+</html>

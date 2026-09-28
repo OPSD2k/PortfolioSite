@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/terminalize.css" media="screen" />
+    <link rel="shortcut icon" href="img/warioadaptheadico.ico">
+    <title>
+        Home
+    </title>
+</head>
+
+<body>
+    <!--<img src="img/wooden-textured-background.jpg" id="wood">
+    <img src="img/wooden-textured-background.jpg" id="wood2">-->
+    <script>
+        function redirectWithFallingAnimation(destination) {
+            if (typeof window.triggerFallingAnimation === "function") {
+                window.triggerFallingAnimation();
+            }
+            document.body.classList.add('noScroll');
+            setTimeout(() => {
+                window.location.href = destination;
+            }, 1600);
+        }
+
+        window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+    </script>
+    <div class="overlay">
+        <img src="img/bezel.png" id="bezel" onload="console.log('Bezel loaded');" onerror="console.error('Bezel failed to load');">
+        <img src="img/scanlines.png" id="scan" onload="console.log('Scanlines loaded');" onerror="console.error('Scanlines failed to load');">
+    </div>
+    <div id="wrapper">
+        <script src="libraries/p5.min.js"></script>
+        <script src="js/charges.js"></script>
+        <canvas></canvas>
+        <ul id="mainMenu">
+            <li class="mainMenu" id='portfolio'><a href="html/portfolio.html" onclick="redirectWithFallingAnimation(this.href); return false;">Wheel</a></li>
+            <li class="mainMenu" id='Influences'><a href="html/influences.html" onclick="redirectWithFallingAnimation(this.href); return false;">Planets</a></li>
+            <li class="mainMenu" id='Contact'><a href="html/contact.html" onclick="redirectWithFallingAnimation(this.href); return false;">Contact</a></li>
+        </ul>
+    </div>
+</body>
+</html>
