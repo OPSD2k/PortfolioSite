@@ -87,6 +87,34 @@ ul#mainMenu {
     position: relative;
 }
 
+@media (max-width: 600px) {
+    ul#mainMenu {
+        width: 82vw;
+        max-width: 360px;
+        box-sizing: border-box;
+        padding: 16px;
+        font-size: 1.35em;
+    }
+
+    ul#mainMenu li.mainMenu a {
+        padding: 14px 12px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 380px) and (max-height: 700px) {
+    ul#mainMenu {
+        min-height: 320px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+
+    li.mainMenu {
+        margin-top: 0;
+    }
+}
+
 .contactPanel {
     display: flex;
     flex-direction: column;
