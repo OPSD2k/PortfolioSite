@@ -34,10 +34,6 @@ body {
         z-index: 1;
     }
 
-    #scan {
-        opacity: 0.4;
-    }
-
 #wrapper {
     display: flex;
     justify-content: center;

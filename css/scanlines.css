@@ -1,0 +1,7 @@
+:root {
+    --scanline-opacity: 0.4;
+}
+
+#scan {
+    opacity: var(--scanline-opacity);
+}
