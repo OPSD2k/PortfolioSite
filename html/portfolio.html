@@ -145,21 +145,35 @@
 	let rotation = 0;
 	let rotationSpeed = 5;
 	let spinning = false;
+  let polygonElement;
+  let squareElements = [];
+  let verticalOffset = 0;
+
+  function updateWheelTransforms() {
+    if (!polygonElement) {
+      return;
+    }
+
+    polygonElement.style.transform = `translateY(${verticalOffset}px) rotate(${rotation}deg)`;
+    for (const square of squareElements) {
+      square.style.transform = `rotate(${-rotation}deg)`;
+    }
+  }
 
   $(document).ready(function() {
 
     function init() {
-      const polygon = $('#polygon');
-      const windowHeight = $(window).height();
-      const polygonHeight = polygon.outerHeight();
+      const polygon = polygonElement;
+      const windowHeight = window.innerHeight;
+      const polygonHeight = polygon.offsetHeight;
       const initialTop = -polygonHeight;
       const finalTop = (windowHeight - polygonHeight) / 2;
 
-      polygon.css({
-        'position': 'fixed',
-        'top': `${initialTop}px`,
-        'visibility': 'visible',
-      });
+      polygon.style.position = 'fixed';
+      polygon.style.top = `${finalTop}px`;
+      polygon.style.visibility = 'visible';
+      verticalOffset = initialTop - finalTop;
+      updateWheelTransforms();
 
       const fallDuration = 1500;
       const fallDistance = finalTop - initialTop;
@@ -180,33 +194,23 @@
 
         const elapsed = timestamp - startTime;
         currentTime = Math.min(elapsed, fallDuration);
-        let speed = initialSpeed + acceleration * currentTime;
         let distance = initialTop + initialSpeed * currentTime + 0.5 * acceleration * currentTime * currentTime;
-        polygon.css('top', `${distance}px`);
+        verticalOffset = distance - finalTop;
 
         if (currentTime < fallDuration) {
           if (rotationSpeed > 0.02) {
             rotationSpeed += deceleration;
             rotation += rotationSpeed;
-            $('#polygon').css({
-              'transform': `rotate(${rotation}deg)`
-            });
-            $('.square').css({
-              'transform': `rotate(${-rotation}deg)`
-            });
           }
+          updateWheelTransforms();
           requestAnimationFrame(fall);
         } else {
+          updateWheelTransforms();
           function decelerate() {
             if (rotationSpeed > 0.02) {
               rotationSpeed += deceleration;
               rotation += rotationSpeed;
-              $('#polygon').css({
-                'transform': `rotate(${rotation}deg)`
-              });
-              $('.square').css({
-                'transform': `rotate(${-rotation}deg)`
-              });
+              updateWheelTransforms();
               requestAnimationFrame(decelerate);
             }
           }
@@ -220,12 +224,14 @@
 
 
     function centerPolygonOnResize() {
-      const polygon = $('#polygon');
-      const windowHeight = $(window).height();
-      const polygonHeight = polygon.outerHeight();
+      const polygon = polygonElement;
+      const windowHeight = window.innerHeight;
+      const polygonHeight = polygon.offsetHeight;
       const finalTop = (windowHeight - polygonHeight) / 2;
 
-      polygon.css('top', `${finalTop}px`);
+      polygon.style.top = `${finalTop}px`;
+      verticalOffset = 0;
+      updateWheelTransforms();
     }
 
     init(); // Call the init function
@@ -303,6 +309,8 @@ function popUp(infobox) {
       }
 
       $('body').append(polygon);
+      polygonElement = polygon[0];
+      squareElements = Array.from(polygonElement.querySelectorAll('.square'));
 
       //let rotation = 0;
       //let spinning = false;
@@ -313,12 +321,7 @@ function popUp(infobox) {
         if (spinning) {
           rotationSpeed += acceleration;
           rotation += rotationSpeed;
-          $('#polygon').css({
-            'transform': `rotate(${rotation}deg)`
-          });
-          $('.square').css({
-            'transform': `rotate(${-rotation}deg)`
-          });
+          updateWheelTransforms();
           requestAnimationFrame(spin);
         }
       }
@@ -350,12 +353,7 @@ function decelerate() {
   if (rotationSpeed > 0.02) {
       rotationSpeed += deceleration;
       rotation += rotationSpeed;
-      $('#polygon').css({
-          'transform': `rotate(${rotation}deg)`
-      });
-      $('.square').css({
-          'transform': `rotate(${-rotation}deg)`
-      });
+    updateWheelTransforms();
       requestAnimationFrame(decelerate);
   } else {
       rotationSpeed = 0.5;
@@ -411,14 +409,16 @@ $(this).fadeOut(500, function() {
     function fallDownAndFadeOut() {
   $('html, body').css('overflow', 'hidden');
   const fallDuration = 1500;
-  const windowHeight = $(window).height();
-  const polygonHeight = $('#polygon').outerHeight();
+      const windowHeight = window.innerHeight;
+      const polygonHeight = polygonElement.offsetHeight;
   const initialTop = (windowHeight - polygonHeight) / 2;
   const finalTop = windowHeight + polygonHeight;
 
   const fallDistance = finalTop - initialTop;
   const initialSpeed = (2 * fallDistance) / fallDuration;
   const acceleration = -(initialSpeed * initialSpeed) / (2 * fallDistance);
+      polygonElement.style.top = `${initialTop}px`;
+      verticalOffset = 0;
 
   let currentTime = 0;
   let startTime;
@@ -430,14 +430,14 @@ $(this).fadeOut(500, function() {
 
     const elapsed = timestamp - startTime;
     currentTime = Math.min(elapsed, fallDuration);
-    let speed = initialSpeed + acceleration * currentTime;
     let distance = initialTop + initialSpeed * currentTime + 0.5 * acceleration * currentTime * currentTime;
-    $('#polygon').css('top', `${distance}px`);
+    verticalOffset = distance - initialTop;
+    updateWheelTransforms();
 
     if (currentTime < fallDuration) {
       requestAnimationFrame(fall);
     } else {
-      $('#polygon').fadeOut(500, function () {
+      $(polygonElement).fadeOut(500, function () {
 	$('html, body').css('overflow', '');
 	});
     }
