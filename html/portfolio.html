@@ -16,10 +16,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      min-height: 100svh;
+      height: 100vh;
       margin: 0;
-      overflow: hidden;
     }
 
     .screen-overlay {
@@ -44,8 +42,12 @@
       background-color: black;
       border: 5px solid green;
       border-radius: 10%;
-      cursor: pointer;
+      cursor: grab;
       transform-origin: 50px 50px;
+    }
+
+    .square:active {
+      cursor: grabbing;
     }
 
     .square:hover {
@@ -76,6 +78,8 @@
       height: 400px;
       transform-origin: center;
       visibility: hidden;
+      touch-action: none;
+      user-select: none;
     }
 
     .title {
@@ -112,8 +116,7 @@
     font-size: 20px;
     cursor: pointer;
     text-shadow: 0 0 6px green, 0 0 0px green;
-    top: auto;
-    bottom: max(20px, env(safe-area-inset-bottom));
+    top: calc(50% + 270px);
     left: 50%;
     transform: translate(-50%, 0);
   }
@@ -126,16 +129,14 @@
   background-color: black;
   border: 5px solid green;
   border-radius: 10%;
-  width: min(300px, calc(100vw - 32px));
-  min-height: 200px;
-  box-sizing: border-box;
+  width: 300px;
+  height: 200px;
   display: none;
   color: green;
   text-shadow: 0 0 6px green, 0 0 0px green;
   text-align: center;
   padding: 20px;
   font-size: 24px;
-  overflow-wrap: anywhere;
 }
   </style>
 </head>
@@ -153,34 +154,127 @@
   let polygonElement;
   let squareElements = [];
   let verticalOffset = 0;
+  let activePointerId = null;
+  let wheelDragging = false;
+  let movedWhileDragging = false;
+  let suppressSquareClick = false;
+  let pointerStartX = 0;
+  let pointerStartY = 0;
+  let lastPointerAngle = 0;
+  let lastPointerTime = 0;
+  let dragAngularVelocity = 0;
 
   function updateWheelTransforms() {
     if (!polygonElement) {
       return;
     }
 
-    polygonElement.style.transform = `translateY(${verticalOffset}px) rotate(${rotation}deg) scale(var(--wheel-scale, 1))`;
+    polygonElement.style.transform = `translateY(${verticalOffset}px) rotate(${rotation}deg)`;
     for (const square of squareElements) {
       square.style.transform = `rotate(${-rotation}deg)`;
     }
   }
 
-  function applyWheelScale() {
-    if (!polygonElement) {
+  function getWheelPointerAngle(event) {
+    const bounds = polygonElement.getBoundingClientRect();
+    const centerX = bounds.left + bounds.width / 2;
+    const centerY = bounds.top + bounds.height / 2;
+    return Math.atan2(event.clientY - centerY, event.clientX - centerX) * 180 / Math.PI;
+  }
+
+  function beginWheelDrag(event) {
+    if (event.pointerType === 'mouse' && event.button !== 0) {
       return;
     }
 
-    const availableWidth = Math.max(window.innerWidth - 32, 0);
-    const availableHeight = Math.max(window.innerHeight - 112, 0);
-    const scale = Math.max(0.25, Math.min(1, availableWidth / 600, availableHeight / 600));
-    polygonElement.style.setProperty('--wheel-scale', scale);
+    activePointerId = event.pointerId;
+    wheelDragging = true;
+    movedWhileDragging = false;
+    spinning = false;
+    rotationSpeed = 0;
+    dragAngularVelocity = 0;
+    pointerStartX = event.clientX;
+    pointerStartY = event.clientY;
+    lastPointerAngle = getWheelPointerAngle(event);
+    lastPointerTime = performance.now();
+  }
+
+  function moveWheelDrag(event) {
+    if (!wheelDragging || event.pointerId !== activePointerId) {
+      return;
+    }
+
+    const distanceX = event.clientX - pointerStartX;
+    const distanceY = event.clientY - pointerStartY;
+    if (Math.hypot(distanceX, distanceY) > 4) {
+      movedWhileDragging = true;
+    }
+
+    const pointerAngle = getWheelPointerAngle(event);
+    let angleDelta = pointerAngle - lastPointerAngle;
+    if (angleDelta > 180) angleDelta -= 360;
+    if (angleDelta < -180) angleDelta += 360;
+
+    const currentTime = performance.now();
+    const elapsed = currentTime - lastPointerTime;
+    if (elapsed > 0) {
+      dragAngularVelocity = Math.max(-720, Math.min(720, angleDelta / elapsed * 1000));
+    }
+
+    rotation += angleDelta;
+    lastPointerAngle = pointerAngle;
+    lastPointerTime = currentTime;
+    updateWheelTransforms();
+  }
+
+  function finishWheelDrag(event) {
+    if (!wheelDragging || event.pointerId !== activePointerId) {
+      return;
+    }
+
+    wheelDragging = false;
+    activePointerId = null;
+
+    if (movedWhileDragging) {
+      suppressSquareClick = true;
+      setTimeout(() => {
+        suppressSquareClick = false;
+      }, 0);
+    }
+
+    if (Math.abs(dragAngularVelocity) > 15) {
+      spinning = true;
+      let previousFrameTime = performance.now();
+
+      function continueDragSpin(timestamp) {
+        if (!spinning || wheelDragging) {
+          return;
+        }
+
+        const elapsed = Math.min((timestamp - previousFrameTime) / 1000, 0.05);
+        previousFrameTime = timestamp;
+        rotation += dragAngularVelocity * elapsed;
+        dragAngularVelocity *= Math.exp(-3.2 * elapsed);
+        updateWheelTransforms();
+
+        if (Math.abs(dragAngularVelocity) > 8) {
+          requestAnimationFrame(continueDragSpin);
+        } else {
+          dragAngularVelocity = 0;
+          spinning = false;
+        }
+      }
+
+      requestAnimationFrame(continueDragSpin);
+    } else {
+      dragAngularVelocity = 0;
+    }
   }
 
   $(document).ready(function() {
 
     function init() {
       const polygon = polygonElement;
-      applyWheelScale();
       const windowHeight = window.innerHeight;
       const polygonHeight = polygon.offsetHeight;
       const initialTop = -polygonHeight;
@@ -242,7 +336,6 @@
 
     function centerPolygonOnResize() {
       const polygon = polygonElement;
-      applyWheelScale();
       const windowHeight = window.innerHeight;
       const polygonHeight = polygon.offsetHeight;
       const finalTop = (windowHeight - polygonHeight) / 2;
@@ -310,12 +403,18 @@ function popUp(infobox) {
 
         polygon.append(square);
 
+   const goBackText = $('<div>').addClass('go-back').text('Go back').hide();
+   $('body').append(goBackText);
+
    // goBackText.on('click', function() {
    //     goBackText.hide();
    //     $('.square').fadeIn(1000);
    // });
 
    square.on('click', function() {
+  if (suppressSquareClick) {
+    return;
+  }
   if (!spinning) {
     showInfoBox(squareData[i].title);
   }
@@ -326,6 +425,10 @@ function popUp(infobox) {
       $('body').append(polygon);
       polygonElement = polygon[0];
       squareElements = Array.from(polygonElement.querySelectorAll('.square'));
+      polygonElement.addEventListener('pointerdown', beginWheelDrag);
+      window.addEventListener('pointermove', moveWheelDrag);
+      window.addEventListener('pointerup', finishWheelDrag);
+      window.addEventListener('pointercancel', finishWheelDrag);
 
       //let rotation = 0;
       //let spinning = false;
@@ -342,6 +445,9 @@ function popUp(infobox) {
       }
 
       $('.square').on('click', function() {
+        if (suppressSquareClick) {
+          return;
+        }
         if (!spinning) {
           spinning = true;
           spin();

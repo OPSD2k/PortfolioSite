@@ -42,7 +42,7 @@ class CelestialBodySystem {
       let yMoon0 = randomGaussian();
       let yMoon = constrain(yMoon0 * moonsSpawnSD + height / 2, 20, height - 20); // normally distribute y with mean half of the screen
 
-      this.bodyList.push(new CelestialBody(/*mass in kg*/10, /*radius in px*/5, /*initial pos*/createVector(xMoon, yMoon), /*initial vel*/createVector(0, -10)));
+      this.bodyList.push(new CelestialBody(/*mass in kg*/10, /*radius in px*/5, /*initial pos*/createVector(xMoon, yMoon), /*initial vel*/createVector(0, -12)));
     }
 
     // comets
@@ -53,7 +53,7 @@ class CelestialBodySystem {
       let yMoon0 = randomGaussian();
       let yMoon = constrain(yMoon0 * moonsSpawnSD + height / 2, 20, height - 20); // normally distribute y with mean half of the screen
 
-      this.bodyList.push(new Comet(/*mass in kg*/10, /*radius in px*/5, /*initial pos*/createVector(xMoon, yMoon), /*initial vel*/createVector(0, -10)));
+      this.bodyList.push(new Comet(/*mass in kg*/10, /*radius in px*/5, /*initial pos*/createVector(xMoon, yMoon), /*initial vel*/createVector(0, -12)));
     }
   }
 
