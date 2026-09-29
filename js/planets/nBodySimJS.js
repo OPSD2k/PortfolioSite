@@ -21,7 +21,8 @@ let displayBodyNames;  //if I don't make this global, showing/hiding names isn't
 let numberOfBodies;
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  const canvas = createCanvas(windowWidth, windowHeight);
+  canvas.elt.addEventListener('contextmenu', (event) => event.preventDefault());
   //auto-focus for 1 second
   //if (millis() < 1000) {
   //  ((java.awt.Canvas) surface.getNative()).requestFocus();
@@ -81,6 +82,11 @@ function mousePressed() {
   else {  //only one other mouse button
     toggleDisplayBodyNames();
   }
+}
+
+function touchStarted() {
+  celestialBodySystem.spawnSingleBody(createVector(mouseX, mouseY));
+  return false;
 }
 
 function keyPressed() {
