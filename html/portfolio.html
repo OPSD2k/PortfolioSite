@@ -16,8 +16,10 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      min-height: 100svh;
       margin: 0;
+      overflow: hidden;
     }
 
     .screen-overlay {
@@ -110,7 +112,8 @@
     font-size: 20px;
     cursor: pointer;
     text-shadow: 0 0 6px green, 0 0 0px green;
-    top: calc(50% + 270px);
+    top: auto;
+    bottom: max(20px, env(safe-area-inset-bottom));
     left: 50%;
     transform: translate(-50%, 0);
   }
@@ -123,14 +126,16 @@
   background-color: black;
   border: 5px solid green;
   border-radius: 10%;
-  width: 300px;
-  height: 200px;
+  width: min(300px, calc(100vw - 32px));
+  min-height: 200px;
+  box-sizing: border-box;
   display: none;
   color: green;
   text-shadow: 0 0 6px green, 0 0 0px green;
   text-align: center;
   padding: 20px;
   font-size: 24px;
+  overflow-wrap: anywhere;
 }
   </style>
 </head>
@@ -154,16 +159,28 @@
       return;
     }
 
-    polygonElement.style.transform = `translateY(${verticalOffset}px) rotate(${rotation}deg)`;
+    polygonElement.style.transform = `translateY(${verticalOffset}px) rotate(${rotation}deg) scale(var(--wheel-scale, 1))`;
     for (const square of squareElements) {
       square.style.transform = `rotate(${-rotation}deg)`;
     }
+  }
+
+  function applyWheelScale() {
+    if (!polygonElement) {
+      return;
+    }
+
+    const availableWidth = Math.max(window.innerWidth - 32, 0);
+    const availableHeight = Math.max(window.innerHeight - 112, 0);
+    const scale = Math.max(0.25, Math.min(1, availableWidth / 600, availableHeight / 600));
+    polygonElement.style.setProperty('--wheel-scale', scale);
   }
 
   $(document).ready(function() {
 
     function init() {
       const polygon = polygonElement;
+      applyWheelScale();
       const windowHeight = window.innerHeight;
       const polygonHeight = polygon.offsetHeight;
       const initialTop = -polygonHeight;
@@ -225,6 +242,7 @@
 
     function centerPolygonOnResize() {
       const polygon = polygonElement;
+      applyWheelScale();
       const windowHeight = window.innerHeight;
       const polygonHeight = polygon.offsetHeight;
       const finalTop = (windowHeight - polygonHeight) / 2;
@@ -291,9 +309,6 @@ function popUp(infobox) {
         square.append(overlay);
 
         polygon.append(square);
-
-   const goBackText = $('<div>').addClass('go-back').text('Go back').hide();
-   $('body').append(goBackText);
 
    // goBackText.on('click', function() {
    //     goBackText.hide();

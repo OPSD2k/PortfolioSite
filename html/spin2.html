@@ -14,8 +14,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+    min-height: 100vh;
+    min-height: 100svh;
   margin: 0;
+    overflow: hidden;
 }
 
 @keyframes colfade{
@@ -67,12 +69,21 @@
         let rotationSpeed = 0.5;
         let acceleration = 0.05;
 
+                function updateTriangleScale() {
+                    const scale = Math.max(0.25, Math.min(1, (window.innerWidth - 32) / 400, (window.innerHeight - 40) / 360));
+                    $('#triangle').css('--triangle-scale', scale);
+                    $('#triangle').css('transform', `rotate(${rotation}deg) scale(${scale})`);
+                }
+
+                updateTriangleScale();
+                $(window).on('resize', updateTriangleScale);
+
         function spin() {
     if (spinning) {
         rotationSpeed += acceleration;
         rotation += rotationSpeed;
         $('#triangle').css({
-            'transform': `rotate(${rotation}deg)`
+            'transform': `rotate(${rotation}deg) scale(var(--triangle-scale, 1))`
         });
         $('.square').css({
             'transform': `rotate(${-rotation}deg)`

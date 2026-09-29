@@ -4,8 +4,9 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    min-height: 100svh;
+    overflow-x: hidden;
 }
 
     body.noScroll {
@@ -13,11 +14,8 @@ body {
     }
 
 .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: fixed;
+    inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -45,7 +43,7 @@ canvas {
     display: block;
     margin: 0;
     padding: 0;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     z-index: -1;
@@ -73,7 +71,9 @@ canvas {
 
 ul#mainMenu {
     width: fit-content;
+    max-width: calc(100vw - 32px);
     height: fit-content;
+    box-sizing: border-box;
     color: green;
     list-style-type: none;
     padding: 10px;
@@ -85,6 +85,10 @@ ul#mainMenu {
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     position: relative;
+}
+
+ul#mainMenu li.mainMenu a {
+    overflow-wrap: anywhere;
 }
 
 @media (max-width: 600px) {
@@ -129,6 +133,10 @@ ul#mainMenu {
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     position: relative;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
 }
 
 
@@ -142,6 +150,12 @@ li.mainMenu {
     li.mainMenu a {
         display: block;
         padding: 5px;
+    }
+
+    li.mainMenu a:focus-visible,
+    .contactPanel a:focus-visible {
+        outline: 2px solid lime;
+        outline-offset: 3px;
     }
 
     li.mainMenu:hover {

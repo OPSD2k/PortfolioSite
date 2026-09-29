@@ -31,16 +31,16 @@ class CelestialBodySystem {
     // main planet
     this.bodyList.push(new CelestialBody(/*mass in kg*/100000, /*radius in px*/20, /*initial pos*/createVector(width / 2, height / 2), /*initial vel*/createVector(0, 0)));
 
-    let moonsSpawnMean = this.bodyList[0].positionVector.x + 300; // normal distribution to the right of the planet
-    let moonsSpawnSD = 50; // just a guess, seems nice
+    let moonsSpawnMean = this.bodyList[0].positionVector.x + Math.min(300, width * 0.32); // normal distribution to the right of the planet
+    let moonsSpawnSD = Math.min(50, Math.min(width, height) * 0.12);
 
     // bodies
     for (let i = 0; i < passedNumberOfBodies / 2; i++) {
       let xMoon0 = randomGaussian();
-      let xMoon = xMoon0 * moonsSpawnSD + moonsSpawnMean; // normally distribute x
+      let xMoon = constrain(xMoon0 * moonsSpawnSD + moonsSpawnMean, 20, width - 20); // normally distribute x
 
       let yMoon0 = randomGaussian();
-      let yMoon = yMoon0 * moonsSpawnSD + height / 2; // normally distribute y with mean half of the screen
+      let yMoon = constrain(yMoon0 * moonsSpawnSD + height / 2, 20, height - 20); // normally distribute y with mean half of the screen
 
       this.bodyList.push(new CelestialBody(/*mass in kg*/10, /*radius in px*/5, /*initial pos*/createVector(xMoon, yMoon), /*initial vel*/createVector(0, -10)));
     }
@@ -48,10 +48,10 @@ class CelestialBodySystem {
     // comets
     for (let i = 0; i < passedNumberOfBodies / 2; i++) {
       let xMoon0 = randomGaussian();
-      let xMoon = xMoon0 * moonsSpawnSD + moonsSpawnMean; // normally distribute x
+      let xMoon = constrain(xMoon0 * moonsSpawnSD + moonsSpawnMean, 20, width - 20); // normally distribute x
 
       let yMoon0 = randomGaussian();
-      let yMoon = yMoon0 * moonsSpawnSD + height / 2; // normally distribute y with mean half of the screen
+      let yMoon = constrain(yMoon0 * moonsSpawnSD + height / 2, 20, height - 20); // normally distribute y with mean half of the screen
 
       this.bodyList.push(new Comet(/*mass in kg*/10, /*radius in px*/5, /*initial pos*/createVector(xMoon, yMoon), /*initial vel*/createVector(0, -10)));
     }

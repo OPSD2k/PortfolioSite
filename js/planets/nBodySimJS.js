@@ -50,6 +50,18 @@ function draw() {
 }
 
 function windowResized(){
+  const previousWidth = width;
+  const previousHeight = height;
+  for (const body of celestialBodySystem.bodyList) {
+    body.positionVector.x *= windowWidth / previousWidth;
+    body.positionVector.y *= windowHeight / previousHeight;
+    if (body.cometTail) {
+      for (const particle of body.cometTail.particleList) {
+        particle.positionVector.x *= windowWidth / previousWidth;
+        particle.positionVector.y *= windowHeight / previousHeight;
+      }
+    }
+  }
   resizeCanvas(windowWidth, windowHeight);
 }
 
